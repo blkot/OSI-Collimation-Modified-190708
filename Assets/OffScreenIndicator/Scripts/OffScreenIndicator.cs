@@ -1,0 +1,155 @@
+﻿using UnityEngine;
+using UnityEngine.VR;
+using System.Collections;
+using UnityEngine.UI;
+
+/// <summary>
+/// Off screen indicator.
+/// Classic wrapper, user doesn't need to worry about implementation
+/// </summary>
+namespace Greyman{
+	public class OffScreenIndicator : MonoBehaviour {
+
+		public bool	enableDebug = true;
+		public bool VirtualRealitySupported = false;
+
+
+        public Camera eyeCamera;
+        public GameObject RaycastRoot;
+        public GameObject CanvasL;
+        public GameObject CanvasR;
+        public string eyeLayer;
+        public float OffsetMultiplier = 0f;
+
+
+		public float VR_cameraDistance = 5;
+		public float VR_radius = 1.8f;
+		public float VR_indicatorScale = 0.1f;
+		public GameObject canvas;
+		public int Canvas_circleRadius = 5; //size in pixels
+		public int Canvas_border = 10; // when Canvas is Square pixels in border
+		public int Canvas_indicatorSize = 100; //size in pixels
+		public Indicator[] indicators;
+        //public TargetInfo[] targetInfos;
+		public FixedTarget[] targets;
+		//public 
+		private OffScreenIndicatorManager manager;
+
+		void Awake () {
+			/*
+			if (VRSettings.enabled){
+				VR = true;
+			} else {
+				VR = false;
+			}
+			*/
+            //SetCamera()
+			if(VirtualRealitySupported){
+				manager = gameObject.AddComponent<OffScreenIndicatorManagerVRDoubleEyes>();
+				(manager as OffScreenIndicatorManagerVRDoubleEyes).cameraDistance = VR_cameraDistance;
+				(manager as OffScreenIndicatorManagerVRDoubleEyes).radius = VR_radius;
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).indicatorScale = VR_indicatorScale;
+
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).CanvasL = CanvasL;
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).CanvasR = CanvasR;
+
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).SetCamera(eyeCamera);
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).SetRaycastRoot(RaycastRoot);
+                //(manager as OffScreenIndicatorManagerVRDoubleEyes).SetLayer(this.eyeLayer);
+                (manager as OffScreenIndicatorManagerVRDoubleEyes).CreateIndicatorsParent();
+			} else {
+				manager = gameObject.AddComponent<OffScreenIndicatorManagerCanvas>();
+				(manager as OffScreenIndicatorManagerCanvas).indicatorsParentObj = canvas;
+				(manager as OffScreenIndicatorManagerCanvas).circleRadius = Canvas_circleRadius;
+				(manager as OffScreenIndicatorManagerCanvas).border = Canvas_border;
+				(manager as OffScreenIndicatorManagerCanvas).indicatorSize = Canvas_indicatorSize;
+			}
+			manager.indicators = indicators;
+            //manager.targetInfos = targetInfos;
+			manager.enableDebug = enableDebug;
+			manager.CheckFields();
+			//foreach(FixedTarget target in targets){
+			//	//AddIndicator(target.target, target.indicatorID,eye);
+			//}
+		}
+
+		public void AddIndicator(Transform target, int indicatorID, string eye){
+            manager.AddIndicator(target, indicatorID, eye);
+            
+		}
+
+		public void RemoveIndicator(Transform target){
+			manager.RemoveIndicator(target);
+		}
+
+        public void SetCamera(Camera eyeCam)
+        {
+            manager.eyeCamera = eyeCam;
+        }
+
+        public void SetRaycastRoot(GameObject root)
+        {
+            manager.RaycastRoot = root;
+        }
+
+        private void SetLayer(LayerMask eyelayer)
+        {
+            
+        }
+
+	}
+
+	/// <summary>
+	/// Indicator.
+	/// References and colors for indicator sprites
+	/// </summary>
+	[System.Serializable]
+	public class Indicator{
+		public Sprite onScreenSprite;
+		public Color onScreenColor = Color.white;
+		public bool onScreenRotates;
+		public Sprite offScreenSprite;
+		public Color offScreenColor = Color.white;
+		public bool offScreenRotates;
+		public Vector3 targetOffset;
+		/// <summary>
+		/// Both sprites need to have the same transition
+		/// aswell both sprites need to have the same duration.
+		/// </summary>
+		public Transition transition;
+		public float transitionDuration = 1;
+		[System.NonSerialized]
+		public bool showOnScreen;
+		[System.NonSerialized]
+		public bool showOffScreen;
+
+		public enum Transition{
+			None,
+			Fading,
+			Scaling
+		}
+	}
+    //[System.Serializable]
+    //public class TargetInfo
+    //{
+    //    //public GameObject
+    //    private Text targetName;
+    //    private Text targetDistance;
+    //    private Text targetMeasurements;
+    //    public Color textColor;
+    //    public Vector3 infoOffset;
+    //    public TargetInfo()
+    //    {
+    //        targetName.text = string.Empty;
+    //        targetDistance.text = string.Empty;
+    //        targetMeasurements.text = string.Empty;
+    //        textColor = Color.white;
+    //    }
+    //}
+
+	[System.Serializable]
+	public class FixedTarget{
+		public Transform target;
+		public int indicatorID;
+	}
+}
