@@ -16,7 +16,7 @@ basicly, i duplicate the Steamvr camera(head) as left/right eye, and the camera(
 camera(head)s both tracking as hmd, childs(eye) add the indicator script. specify the left/right eye in scripts in inspector, modify the camera clearflag, culling mask(left/right eye) and depth bigger than maincamera(overlay on any other elements).
 the maincamera culling mask uncheck the left/right.
 
-one debugging script just like DemoScript but initialize two offscreenindicators on CameraRig object.
+one debugging script on CameraRig object just like DemoScript but initialize two offscreenindicators.
 
 you can check this with one eye open and the other closed, or just change the indicator color for each eye.
 
